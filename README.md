@@ -13,20 +13,20 @@ A comprehensive Java-based desktop application for car management, comparison, a
 
 ## Screenshots
 
-![Home Dashboard](screenshots/screenshot1.png)
-*Home Dashboard and Car Selection*
+![Home Screen](screenshots/homsecreenuser.png)
+*User Home Screen Dashboard*
 
-![Car Management](screenshots/screenshot2.png)
-*Car Inventory Management for Admins*
+![Car List](screenshots/listcar.png)
+*Comprehensive Car Listing and Selection*
 
-![Car Comparison](screenshots/screenshot3.png)
-*Side-by-side Car Comparison Tool*
+![Car Details](screenshots/cardetails.png)
+*Detailed Specifications and Information for Selected Cars*
 
-![Loan Calculator](screenshots/screenshot4.png)
-*Integrated Loan and Installment Calculator*
+![Car Comparison](screenshots/comparecar.png)
+*Side-by-side Technical Comparison Tool*
 
-![User Management](screenshots/screenshot5.png)
-*User Accounts and Profile Management*
+![Loan Calculator](screenshots/loancalculator.png)
+*Financial Planning and Loan Installment Calculator*
 
 ## Project Structure
 
