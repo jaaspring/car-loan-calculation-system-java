@@ -1,0 +1,10 @@
+build/
+dist/
+nbproject/private/
+nbbuild/
+nbdist/
+.netbeans/
+*.class
+*.jar
+*.war
+*.ear

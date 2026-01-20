@@ -1,0 +1,513 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package finalproject;
+
+import java.awt.Image;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
+
+/**
+ *
+ * @author Afifah
+ */
+public class CarDetailsFrame extends javax.swing.JFrame {
+
+    private String selectedModel;
+    private String userId;
+    private String username;
+    private HashMap<String, String> variantPriceMap = new HashMap<>();
+
+
+    // Constructor for guests (no userId)
+    public CarDetailsFrame(String model) {
+        this.selectedModel = model;
+        initComponents();
+        setLocationRelativeTo(null);
+        loadCarDetails();
+    }
+
+    // Constructor for logged-in users
+    public CarDetailsFrame(String model, String userId, String username) {
+        this.userId = userId;
+        this.username = username;
+        this.selectedModel = model;
+        initComponents();
+        setLocationRelativeTo(null);
+        loadCarDetails();
+    }
+private void loadCarDetails() {
+    System.out.println("Loading details for: " + selectedModel);
+
+    String query = "SELECT variant, price, paint_type, image_path FROM car_details WHERE model = ?";
+
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(query)) {
+
+        stmt.setString(1, selectedModel);
+        ResultSet rs = stmt.executeQuery();
+
+        variantComboBox.removeAllItems();  // Clear the previous variants
+        paintTypeComboBox.removeAllItems();  // Clear previous paint types
+        variantPriceMap.clear();
+
+        if (!rs.isBeforeFirst()) { // No results
+            JOptionPane.showMessageDialog(this, "No details found for: " + selectedModel);
+            return;
+        }
+
+        // Use a Set to store unique variants
+        HashSet<String> uniqueVariants = new HashSet<>();
+        HashMap<String, HashSet<String>> variantPaintTypes = new HashMap<>();
+
+        while (rs.next()) {
+            String variant = rs.getString("variant");
+            String price = rs.getString("price");
+            String paintType = rs.getString("paint_type");
+
+            uniqueVariants.add(variant);  // Add variant to the set (duplicates will be ignored)
+            variantPriceMap.put(variant, price);
+
+            // Track unique paint types for each variant
+            variantPaintTypes.putIfAbsent(variant, new HashSet<>());
+            variantPaintTypes.get(variant).add(paintType);
+
+            // Populate car details and image for the first variant
+            if (uniqueVariants.size() == 1) {
+                lblVehicle.setText(selectedModel);
+                lblPrice.setText(price);
+                setCarImage(rs.getString("image_path"));
+            }
+        }
+
+        // Add unique variants to the combo box
+        for (String variant : uniqueVariants) {
+            variantComboBox.addItem(variant);
+        }
+
+        // After loading the data, update the paint type combo box based on the selected variant
+        variantComboBox.addActionListener(evt -> {
+            String selectedVariant = (String) variantComboBox.getSelectedItem();
+            if (selectedVariant != null) {
+                // Clear previous paint types
+                paintTypeComboBox.removeAllItems();
+                // Add unique paint types for the selected variant
+                for (String pt : variantPaintTypes.get(selectedVariant)) {
+                    paintTypeComboBox.addItem(pt);
+                }
+                // Update price when variant is selected
+                lblPrice.setText(variantPriceMap.get(selectedVariant));
+            }
+        });
+
+    } catch (SQLException e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Database Error: " + e.getMessage());
+    }
+}
+
+
+
+    private void setCarImage(String imagePath) {
+        if (imagePath == null || imagePath.isEmpty()) {
+            System.out.println("No image path found!");
+            return;
+        }
+
+        try {
+            ImageIcon icon = new ImageIcon(getClass().getResource("/" + imagePath));
+            Image scaledImage = icon.getImage().getScaledInstance(
+                    lblCarImage.getWidth(), lblCarImage.getHeight(), Image.SCALE_SMOOTH);
+            lblCarImage.setIcon(new ImageIcon(scaledImage));
+            System.out.println("Image loaded: " + imagePath);
+        } catch (Exception e) {
+            System.out.println("ERROR: Image NOT FOUND -> " + imagePath);
+            lblCarImage.setIcon(null);
+        }
+    }
+
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        background = new Styles.GradientPanel()
+        ;
+        backButton =  Styles.createRoundedButton("Back");
+        exitButton =  Styles.createRoundedButton("Exit");
+        jPanel1 = new Styles.RoundedBevelPanel();
+        jLabel1 = new javax.swing.JLabel();
+        lblVehicle = new javax.swing.JLabel();
+        lblCar = new javax.swing.JLabel();
+        lblPrice = new javax.swing.JLabel();
+        lblVariant = new javax.swing.JLabel();
+        lblPaintType = new javax.swing.JLabel();
+        variantComboBox = new javax.swing.JComboBox<>();
+        paintTypeComboBox = new javax.swing.JComboBox<>();
+        lblCarImage = new javax.swing.JLabel();
+        lblTitle = new javax.swing.JLabel();
+        btnCompare = Styles.createRoundedButton("Compare Model");
+        btnBook = Styles.createRoundedButton("Book Now");
+        lblTitle1 = new javax.swing.JLabel();
+        lblTitle2 = new javax.swing.JLabel();
+        lblTitle3 = new javax.swing.JLabel();
+        lblTitle4 = new javax.swing.JLabel();
+        lblTitle5 = new javax.swing.JLabel();
+        lblTitle6 = new javax.swing.JLabel();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Car Calculation System");
+
+        backButton.setBackground(new java.awt.Color(0, 0, 0));
+        backButton.setFont(new java.awt.Font("Century Gothic", 1, 12)); // NOI18N
+        backButton.setForeground(new java.awt.Color(255, 255, 255));
+        backButton.setText("Back");
+        backButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backButtonActionPerformed(evt);
+            }
+        });
+
+        exitButton.setBackground(new java.awt.Color(204, 51, 0));
+        exitButton.setFont(new java.awt.Font("Century Gothic", 1, 12)); // NOI18N
+        exitButton.setForeground(new java.awt.Color(255, 255, 255));
+        exitButton.setText("Exit");
+        exitButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exitButtonActionPerformed(evt);
+            }
+        });
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+
+        jLabel1.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
+        jLabel1.setText("STARTING PRICE");
+
+        lblVehicle.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+
+        lblCar.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
+        lblCar.setText("VEHICLE");
+
+        lblPrice.setFont(new java.awt.Font("Century Gothic", 1, 24)); // NOI18N
+
+        lblVariant.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
+        lblVariant.setText("VARIANT");
+
+        lblPaintType.setFont(new java.awt.Font("Century Gothic", 0, 14)); // NOI18N
+        lblPaintType.setText("PAINT TYPE");
+
+        variantComboBox.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+        variantComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        variantComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                variantComboBoxActionPerformed(evt);
+            }
+        });
+
+        paintTypeComboBox.setFont(new java.awt.Font("Century Gothic", 1, 14)); // NOI18N
+        paintTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        paintTypeComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                paintTypeComboBoxActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(111, 111, 111)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblPrice, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(118, Short.MAX_VALUE))
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(47, 47, 47)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(lblPaintType)
+                    .addComponent(lblCar)
+                    .addComponent(lblVehicle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(lblVariant)
+                    .addComponent(variantComboBox, 0, 255, Short.MAX_VALUE)
+                    .addComponent(paintTypeComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(26, 26, 26)
+                .addComponent(lblCar)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblVehicle, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(lblVariant)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(variantComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(lblPaintType)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(paintTypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(29, 29, 29)
+                .addComponent(lblPrice, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel1)
+                .addContainerGap(34, Short.MAX_VALUE))
+        );
+
+        lblTitle.setFont(new java.awt.Font("Century Gothic", 1, 18)); // NOI18N
+        lblTitle.setText("You have your sights set on a Proton!");
+
+        btnCompare.setBackground(new java.awt.Color(0, 0, 0));
+        btnCompare.setFont(new java.awt.Font("Century Gothic", 1, 12)); // NOI18N
+        btnCompare.setForeground(new java.awt.Color(255, 255, 255));
+        btnCompare.setText("Compare Model");
+        btnCompare.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCompareActionPerformed(evt);
+            }
+        });
+
+        btnBook.setBackground(new java.awt.Color(0, 0, 0));
+        btnBook.setFont(new java.awt.Font("Century Gothic", 1, 12)); // NOI18N
+        btnBook.setForeground(new java.awt.Color(255, 255, 255));
+        btnBook.setText("Test Drive");
+        btnBook.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnBookActionPerformed(evt);
+            }
+        });
+
+        lblTitle1.setFont(new java.awt.Font("Copperplate Gothic Bold", 1, 22)); // NOI18N
+        lblTitle1.setText("EXCITING");
+
+        lblTitle2.setFont(new java.awt.Font("Copperplate Gothic Bold", 1, 22)); // NOI18N
+        lblTitle2.setText("TOTAL");
+
+        lblTitle3.setFont(new java.awt.Font("Copperplate Gothic Bold", 1, 22)); // NOI18N
+        lblTitle3.setText("LUXURIOUS");
+
+        lblTitle4.setFont(new java.awt.Font("Copperplate Gothic Light", 1, 18)); // NOI18N
+        lblTitle4.setText("DRIVE");
+
+        lblTitle5.setFont(new java.awt.Font("Copperplate Gothic Light", 1, 18)); // NOI18N
+        lblTitle5.setText("safety");
+
+        lblTitle6.setFont(new java.awt.Font("Copperplate Gothic Light", 1, 18)); // NOI18N
+        lblTitle6.setText("comfort");
+
+        javax.swing.GroupLayout backgroundLayout = new javax.swing.GroupLayout(background);
+        background.setLayout(backgroundLayout);
+        backgroundLayout.setHorizontalGroup(
+            backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(backgroundLayout.createSequentialGroup()
+                .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(backgroundLayout.createSequentialGroup()
+                        .addGap(59, 59, 59)
+                        .addComponent(lblTitle1)
+                        .addGap(39, 39, 39)
+                        .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(backgroundLayout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(lblTitle5)
+                                .addGap(86, 86, 86)
+                                .addComponent(lblTitle6))
+                            .addGroup(backgroundLayout.createSequentialGroup()
+                                .addComponent(lblTitle2)
+                                .addGap(43, 43, 43)
+                                .addComponent(lblTitle3))))
+                    .addGroup(backgroundLayout.createSequentialGroup()
+                        .addGap(85, 85, 85)
+                        .addComponent(lblTitle4))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, backgroundLayout.createSequentialGroup()
+                        .addContainerGap(101, Short.MAX_VALUE)
+                        .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lblTitle)
+                            .addGroup(backgroundLayout.createSequentialGroup()
+                                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(backgroundLayout.createSequentialGroup()
+                                        .addGap(42, 42, 42)
+                                        .addComponent(lblCarImage, javax.swing.GroupLayout.PREFERRED_SIZE, 410, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(backgroundLayout.createSequentialGroup()
+                                        .addGap(120, 120, 120)
+                                        .addComponent(btnBook, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                        .addComponent(btnCompare))))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, backgroundLayout.createSequentialGroup()
+                                .addComponent(backButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(exitButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                .addGap(89, 89, 89))
+        );
+        backgroundLayout.setVerticalGroup(
+            backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, backgroundLayout.createSequentialGroup()
+                .addContainerGap(78, Short.MAX_VALUE)
+                .addComponent(lblTitle)
+                .addGap(18, 18, 18)
+                .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(backgroundLayout.createSequentialGroup()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 64, Short.MAX_VALUE)
+                        .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblTitle4)
+                            .addComponent(lblTitle5)
+                            .addComponent(lblTitle6))
+                        .addGap(29, 29, 29))
+                    .addGroup(backgroundLayout.createSequentialGroup()
+                        .addGap(26, 26, 26)
+                        .addComponent(lblCarImage, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnBook, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnCompare, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, backgroundLayout.createSequentialGroup()
+                                .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(lblTitle1)
+                                    .addComponent(lblTitle3)
+                                    .addComponent(lblTitle2))
+                                .addGap(52, 52, 52))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, backgroundLayout.createSequentialGroup()
+                                .addGroup(backgroundLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(exitButton)
+                                    .addComponent(backButton))
+                                .addGap(41, 41, 41))))))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(background, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(background, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void btnBookActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnBookActionPerformed
+    // Get the selected variant from the combo box
+    String selectedVariant = (String) variantComboBox.getSelectedItem();
+
+    // Ensure both model and variant are selected
+    if (selectedModel != null && selectedVariant != null) {
+        // Combine model and variant into one string
+        String selectedModelWithVariant = selectedModel + " - " + selectedVariant;
+
+        // Pass the combined string to CarComparisonFrame
+        new TestDrive(userId, username, selectedModelWithVariant).setVisible(true);
+
+        // Close the current frame
+        this.dispose();
+    } else {
+        JOptionPane.showMessageDialog(this, "Please select both a model and a variant before book.");
+    }
+    }//GEN-LAST:event_btnBookActionPerformed
+
+    private void btnCompareActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCompareActionPerformed
+    // Get the selected variant from the combo box
+    String selectedVariant = (String) variantComboBox.getSelectedItem();
+
+    // Ensure both model and variant are selected
+    if (selectedModel != null && selectedVariant != null) {
+        // Combine model and variant into one string
+        String selectedModelWithVariant = selectedModel + " - " + selectedVariant;
+
+        // Pass the combined string to CarComparisonFrame
+        new CarComparisonFrame(userId, username, selectedModelWithVariant).setVisible(true);
+
+        // Close the current frame
+        this.dispose();
+    } else {
+        JOptionPane.showMessageDialog(this, "Please select both a model and a variant before comparing.");
+    }
+    }//GEN-LAST:event_btnCompareActionPerformed
+
+    private void variantComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_variantComboBoxActionPerformed
+        String selectedVariant = (String) variantComboBox.getSelectedItem();
+        if (selectedVariant != null && variantPriceMap.containsKey(selectedVariant)) {
+            lblPrice.setText(variantPriceMap.get(selectedVariant)); // Update price
+        }
+    }//GEN-LAST:event_variantComboBoxActionPerformed
+
+    private void exitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitButtonActionPerformed
+        int confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to exit?", "Exit", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            System.exit(0); // Close the application
+        }
+    }//GEN-LAST:event_exitButtonActionPerformed
+
+    private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
+        // Close the current frame
+        this.dispose();
+
+        // Navigate to HomeFrame or another frame
+       new AllModelFrame(userId, username).setVisible(true); // Pass the userId if needed
+    }//GEN-LAST:event_backButtonActionPerformed
+
+    private void paintTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_paintTypeComboBoxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_paintTypeComboBoxActionPerformed
+    
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new CarDetailsFrame().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton backButton;
+    private javax.swing.JPanel background;
+    private javax.swing.JButton btnBook;
+    private javax.swing.JButton btnCompare;
+    private javax.swing.JButton exitButton;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JLabel lblCar;
+    private javax.swing.JLabel lblCarImage;
+    private javax.swing.JLabel lblPaintType;
+    private javax.swing.JLabel lblPrice;
+    private javax.swing.JLabel lblTitle;
+    private javax.swing.JLabel lblTitle1;
+    private javax.swing.JLabel lblTitle2;
+    private javax.swing.JLabel lblTitle3;
+    private javax.swing.JLabel lblTitle4;
+    private javax.swing.JLabel lblTitle5;
+    private javax.swing.JLabel lblTitle6;
+    private javax.swing.JLabel lblVariant;
+    private javax.swing.JLabel lblVehicle;
+    private javax.swing.JComboBox<String> paintTypeComboBox;
+    private javax.swing.JComboBox<String> variantComboBox;
+    // End of variables declaration//GEN-END:variables
+
+    private CarDetailsFrame() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+}
